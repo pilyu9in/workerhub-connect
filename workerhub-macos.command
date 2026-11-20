@@ -138,7 +138,7 @@ def choose(title: str, options: list[str], page_size: int = 8) -> int:
                 sys.stdout.flush()
                 raise SetupError(tr("Настройка отменена.", "Setup cancelled."))
     finally:
-        termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, original)
+        termios.tcsetattr(sys.stdin.fileno(), termios.TCSAFLUSH, original)
 
 
 def read_key() -> str:
