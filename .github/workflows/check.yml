@@ -32,7 +32,14 @@ jobs:
       - name: Run the macOS launcher
         run: /bin/sh workerhub-macos.command --help
       - name: Test macOS configuration
-        run: python3 -m unittest discover -s tests -p 'test_macos_command.py' -v
+        run: |
+          if python3 -m unittest discover -s tests -p 'test_macos_command.py' -v > "$RUNNER_TEMP/macos-tests.log" 2>&1; then
+            cat "$RUNNER_TEMP/macos-tests.log"
+          else
+            cat "$RUNNER_TEMP/macos-tests.log"
+            python3 -c 'import pathlib, sys; print("::error::" + pathlib.Path(sys.argv[1]).read_text().replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A"))' "$RUNNER_TEMP/macos-tests.log"
+            exit 1
+          fi
   release:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     needs: [powershell, macos]
