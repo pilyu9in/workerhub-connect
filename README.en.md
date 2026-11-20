@@ -4,11 +4,11 @@
 
 **Your apps. Your key. WORKERHUB models.**
 
-Connect Claude and Codex to WORKERHUB with a single Windows file.
+Connect Claude and Codex to WORKERHUB with one setup file for Windows or macOS.
 
-[Download workerhub.cmd](https://github.com/pilyu9in/workerhub-connect/releases/latest/download/workerhub.cmd) · [Русский](README.md) · [WORKERHUB](https://workerhub.cc) · [Support](https://t.me/workerhub_support)
+[Download for Windows](https://github.com/pilyu9in/workerhub-connect/releases/latest/download/workerhub.cmd) · [Download for macOS](https://github.com/pilyu9in/workerhub-connect/releases/latest/download/workerhub-macos.command) · [Releases and SHA-256](https://github.com/pilyu9in/workerhub-connect/releases) · [Русский](README.md) · [WORKERHUB](https://workerhub.cc) · [Support](https://t.me/workerhub_support)
 
-Windows 10 / 11 · PowerShell 5.1 · Русский / English · MIT
+Windows 10 / 11 · PowerShell 5.1 · macOS · Python 3.11+ · Русский / English · MIT
 
 </div>
 
@@ -16,10 +16,15 @@ Windows 10 / 11 · PowerShell 5.1 · Русский / English · MIT
 
 ## Get started
 
-1. **Download** [workerhub.cmd](https://github.com/pilyu9in/workerhub-connect/releases/latest/download/workerhub.cmd) and double-click it. Your chosen app must already be installed.
-2. **Choose your language and app** with ↑ ↓ and Enter. Press Esc or Ctrl+C to cancel.
+1. Download the setup file for your system. Your chosen app must already be installed.
+   - **Windows:** double-click [workerhub.cmd](https://github.com/pilyu9in/workerhub-connect/releases/latest/download/workerhub.cmd).
+   - **macOS:** Python 3.11 or newer is required. Download [workerhub-macos.command](https://github.com/pilyu9in/workerhub-connect/releases/latest/download/workerhub-macos.command), open Terminal and run:
+     ```sh
+     sh ~/Downloads/workerhub-macos.command
+     ```
+2. **Choose your language and app** with ↑ ↓ and Enter. Esc cancels the selection.
 3. **Paste your API key** from Overview in the WORKERHUB dashboard and select a model. Key input is hidden.
-4. **Fully restart your app or terminal**, including background processes. You are ready to go.
+4. **Fully restart your app or terminal**, including background processes.
 
 Run the file again to connect another app or change the default model. Codex and Codex CLI share settings.
 
@@ -33,15 +38,15 @@ What would you like to connect?
   Codex CLI
 ```
 
-One CMD file with embedded PowerShell. No Node.js, npm, or administrator access required. It configures connections without installing or updating apps.
+The setup files only configure connections; they do not install or update Claude or Codex. Windows uses built-in PowerShell 5.1; macOS requires Python 3.11+ and Terminal. No Node.js or administrator access is required.
 
 ## Supported apps
 
 | App | What gets configured |
 | --- | --- |
-| **Claude Desktop** | A WORKERHUB third-party gateway profile, API key and available Claude models. The selected model is listed first. |
-| **Claude Code CLI** | Windows user environment variables for the gateway, key, default model and Claude family aliases. |
-| **Codex** | The WORKERHUB provider, default model and a local catalog of compatible models in the shared Codex settings. |
+| **Claude Desktop** | A WORKERHUB third-party gateway profile, API key and available Claude models on Windows or macOS. The selected model is listed first. |
+| **Claude Code CLI** | Gateway, key, default model and Claude family aliases in Windows user environment or `~/.claude/settings.json` on macOS. |
+| **Codex** | The WORKERHUB provider, default model and a local catalog of compatible models in shared Codex settings on Windows or macOS. |
 | **Codex CLI** | The same connection as the Codex app. Existing official login is preserved. |
 
 ### Models and billing
@@ -64,13 +69,13 @@ Claude uses the Anthropic-compatible gateway root; the client appends `/v1/messa
 <details>
 <summary><strong>Settings that change</strong></summary>
 
-**Claude Code CLI:** Windows user variables `ANTHROPIC_BASE_URL`, `ANTHROPIC_AUTH_TOKEN`, `ANTHROPIC_MODEL`, `ANTHROPIC_DEFAULT_*_MODEL` family aliases and helper-model settings. `ANTHROPIC_API_KEY` is cleared, and Bedrock/Vertex/Foundry modes are disabled to avoid conflicting routes.
+**Claude Code CLI:** Windows user variables `ANTHROPIC_BASE_URL`, `ANTHROPIC_AUTH_TOKEN`, `ANTHROPIC_MODEL`, family aliases and helper-model settings. On macOS the same values are written inside the `env` object in `~/.claude/settings.json`. On both systems `ANTHROPIC_API_KEY` is cleared and Bedrock/Vertex/Foundry modes are disabled to avoid conflicting routes.
 
-**Claude Desktop:** `deploymentMode = "3p"` in `%LOCALAPPDATA%\Claude\claude_desktop_config.json` and `%LOCALAPPDATA%\Claude-3p\claude_desktop_config.json`. A dedicated WORKERHUB profile is added and activated in `%LOCALAPPDATA%\Claude-3p\configLibrary`; other profiles are retained.
+**Claude Desktop:** `deploymentMode = "3p"` is enabled in the Claude config directory and a dedicated WORKERHUB profile is activated. On Windows this is under `%LOCALAPPDATA%\Claude`; on macOS it is under `~/Library/Application Support/Claude`. Existing profiles are retained.
 
-**Codex / Codex CLI:** The selected model, `model_providers.workerhub` provider and `workerhub-models.json` path in `%USERPROFILE%\.codex\config.toml`. `CODEX_HOME` is respected when set. The key goes into the Windows user variable `WORKERHUB_API_KEY`. `auth.json` is unchanged.
+**Codex / Codex CLI:** The selected model, `model_providers.workerhub` provider and model catalog path are written to `config.toml`. The default directory is `%USERPROFILE%\.codex` on Windows and `~/.codex` on macOS; `CODEX_HOME` is respected on both. Windows stores the key in the `WORKERHUB_API_KEY` user variable. macOS stores it in `~/.workerhub/api-key` with owner-only permissions and uses a helper command when Codex requests it. `auth.json` is unchanged.
 
-Keys are stored locally in environment variables or an app profile **without additional encryption**. Do not publish those settings or backups containing a key.
+Keys are stored locally without additional encryption: in a Windows user variable or Claude Desktop profile, in Claude settings on macOS, or in the owner-only `~/.workerhub/api-key` file for Codex on macOS. Do not publish those settings or backups containing a key.
 
 </details>
 
@@ -94,19 +99,38 @@ Environment variables do not have file backups; automatic rollback applies to a 
 | App reports a key or balance error | Check your dashboard key and balance. Paste the key alone, without spaces or `Bearer`. |
 | Codex Desktop models are missing | Restart the app. Some versions depend on official sign-in for the picker; the script preserves existing login. Try Codex CLI if necessary. |
 | `config.toml` update was refused | Normal tables, including quoted project/plugin paths, are supported. Multiline strings and some inline/dotted provider definitions are deliberately rejected. Use a separate `CODEX_HOME` or configure the provider manually. |
-| File opens in an editor | Save the actual `workerhub.cmd`, not an HTML page or `.txt`. Use an interactive Windows console. |
+| macOS reports that Python is required | Install Python 3.11 or newer, then run the `.command` file from Terminal again. |
+| macOS arrow keys do not work | Run the file in Terminal, not in an editor or without an interactive terminal. |
+| Setup file opens as text | Save the actual setup file, not an HTML page or `.txt`; on Mac, run it from Terminal. |
+
+## Source and download verification
+
+Both release files come from the source at the version tag. The same release includes `SHA256SUMS.txt` with checksums for both files. If you saved your file in Downloads, compare the command output with the entry for your platform in `SHA256SUMS.txt`.
+
+```powershell
+Get-FileHash "$env:USERPROFILE\Downloads\workerhub.cmd" -Algorithm SHA256
+```
+
+```sh
+shasum -a 256 ~/Downloads/workerhub-macos.command
+```
 
 ## Development
 
-All executable code lives in [workerhub.cmd](workerhub.cmd). The CMD wrapper starts embedded PowerShell with a process-scoped execution-policy override; it does not change the system execution policy.
+The Windows setup is in [workerhub.cmd](workerhub.cmd); the macOS setup is in [workerhub-macos.command](workerhub-macos.command). The latter is a shell wrapper with embedded Python code; a separate macOS CI job checks the shell syntax and setup logic.
 
-Keep the script UTF-8 **without BOM** with **CRLF** line endings, as enforced by `.gitattributes`. GitHub Actions checks Windows PowerShell 5.1 syntax, TOML editing and preservation of unrelated settings without real keys or inference requests.
+The Windows script uses UTF-8 without BOM and CRLF line endings. GitHub Actions runs Windows PowerShell checks and a separate macOS installer job, including shell syntax and configuration tests. Tests use temporary directories and fake keys; they do not send inference requests.
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests/smoke.ps1
 ```
 
-[Open an issue](https://github.com/pilyu9in/workerhub-connect/issues) with your app and error text. Remove API keys from any logs or settings you share.
+```sh
+sh -n workerhub-macos.command
+python3 -m unittest discover -s tests -p 'test_macos_command.py' -v
+```
+
+[Open an issue](https://github.com/pilyu9in/workerhub-connect/issues) with your OS, app and error text. Remove API keys from any logs or settings you share.
 
 ## License
 
