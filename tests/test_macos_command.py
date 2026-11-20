@@ -13,21 +13,16 @@ from unittest.mock import patch
 
 COMMAND = Path(__file__).resolve().parents[1] / "workerhub-macos.command"
 TEXT = COMMAND.read_text(encoding="utf-8")
-START = "<<'WORKERHUB_PYTHON_PAYLOAD'\n"
-END = '\nWORKERHUB_PYTHON_PAYLOAD\n)"'
-PAYLOAD = TEXT.split(START, 1)[1].split(END, 1)[0]
 SPEC = importlib.util.spec_from_loader("workerhub_macos_payload", loader=None)
 macos = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = macos
-exec(compile(PAYLOAD, str(COMMAND), "exec"), macos.__dict__)
+exec(compile(TEXT, str(COMMAND), "exec"), macos.__dict__)
 
 
 class MacOSInstallerTests(unittest.TestCase):
     def test_command_is_single_file_and_shell_wrapper_is_well_formed(self):
         self.assertTrue(TEXT.startswith("#!/bin/sh\n"))
-        self.assertEqual(TEXT.count("\nWORKERHUB_PYTHON_PAYLOAD\n"), 1)
         self.assertIn("Python 3.11", TEXT)
-        self.assertIn("os.read(fd, 1)", PAYLOAD)
 
     def test_menu_reader_handles_macos_and_ansi_arrow_sequences(self):
         sequences = [

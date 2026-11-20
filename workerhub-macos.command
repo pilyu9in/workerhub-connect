@@ -1,11 +1,12 @@
 #!/bin/sh
+""":"
 if ! command -v python3 >/dev/null 2>&1 || ! python3 -I -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 11) else 1)' >/dev/null 2>&1; then
   printf '%s\n' 'WORKERHUB Connect for macOS requires Python 3.11 or newer.' 'Install Python from python.org, then open Terminal and run this file again.'
   exit 127
 fi
-python3 -I -c "$(/bin/cat <<'WORKERHUB_PYTHON_PAYLOAD'
-#!/usr/bin/env python3
-"""Configure installed WORKERHUB-compatible Claude and Codex clients on macOS."""
+exec python3 -I "$0" "$@"
+: <<'# WORKERHUB_PYTHON_END'
+":"""
 from __future__ import annotations
 
 import copy
@@ -615,7 +616,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-WORKERHUB_PYTHON_PAYLOAD
-)" "$@"
-result=$?
-exit "$result"
+# WORKERHUB_PYTHON_END

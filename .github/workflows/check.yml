@@ -27,11 +27,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Check shell wrapper and macOS configuration
-        run: |
-          sh -n workerhub-macos.command
-          sh workerhub-macos.command --help
-          python3 -m unittest discover -s tests -p 'test_macos_command.py' -v
+      - name: Check macOS shell syntax
+        run: /bin/sh -n workerhub-macos.command
+      - name: Run the macOS launcher
+        run: /bin/sh workerhub-macos.command --help
+      - name: Test macOS configuration
+        run: python3 -m unittest discover -s tests -p 'test_macos_command.py' -v
   release:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     needs: [powershell, macos]
